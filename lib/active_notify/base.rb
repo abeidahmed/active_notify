@@ -20,9 +20,15 @@ module ActiveNotify
     end
 
     def notify_now
+      lines.each do |_name, config|
+        config.constant.new.notify_now
+      end
     end
 
     def notify_later
+      lines.each do |_name, config|
+        config.constant.new.notify_later
+      end
     end
   end
 end
