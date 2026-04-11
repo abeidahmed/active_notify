@@ -6,8 +6,8 @@ Gem::Specification.new do |spec|
   spec.authors = ["abeidahmed"]
   spec.email = ["abeidahmed92@gmail.com"]
 
-  spec.summary = "Framework for delivering notifications across multiple channels."
-  spec.description = "ActiveNotify provides a unified interface for delivering notifications across multiple channels. It offers a flexible, extensible framework for building and managing notification pipelines with support for synchronous and asynchronous delivery."
+  spec.summary = "Rails framework for delivering notifications across multiple channels."
+  spec.description = "Rails framework for delivering notifications across multiple channels."
   spec.homepage = "https://github.com/abeidahmed/active_notify"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
