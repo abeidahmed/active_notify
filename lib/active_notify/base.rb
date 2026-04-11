@@ -14,8 +14,8 @@ module ActiveNotify
         new.notify_now
       end
 
-      def notify_later
-        new.notify_later
+      def notify_later(...)
+        new.notify_later(...)
       end
 
       def with(params)
@@ -35,9 +35,9 @@ module ActiveNotify
       end
     end
 
-    def notify_later
+    def notify_later(args = {})
       lines.each do |_name, config|
-        config.constant.new(self).notify_later
+        config.constant.new(self).notify_later(args)
       end
     end
   end

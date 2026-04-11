@@ -2,22 +2,22 @@ require "test_helper"
 
 class NotifyTest < ActiveSupport::TestCase
   class Email < ActiveNotify::Line
-    def notify_later
-      MockNotifier.history << [:email, :notify_later, params]
+    def notify_later(args)
+      MockNotifier.history << { line: :email, method: :notify_later, params: params, args: args }
     end
 
     def notify_now
-      MockNotifier.history << [:email, :notify_now, params]
+      MockNotifier.history << { line: :email, method: :notify_now, params: params }
     end
   end
 
   class SMS < ActiveNotify::Line
-    def notify_later
-      MockNotifier.history << [:sms, :notify_later, params]
+    def notify_later(args)
+      MockNotifier.history << { line: :sms, method: :notify_later, params: params, args: args }
     end
 
     def notify_now
-      MockNotifier.history << [:sms, :notify_now, params]
+      MockNotifier.history << { line: :sms, method: :notify_now, params: params }
     end
   end
 
@@ -38,18 +38,24 @@ class NotifyTest < ActiveSupport::TestCase
     MockNotifier.reset_history
   end
 
-  test "notify_later invokes the line's notify_later method" do
+  test "#notify_later invokes the line's notify_later method" do
     MockNotifier.notify_later
 
     assert_equal 2, MockNotifier.history.size
-    assert_equal [[:email, :notify_later, {}], [:sms, :notify_later, {}]], MockNotifier.history
+    assert_equal [
+      { line: :email, method: :notify_later, params: {}, args: {} },
+      { line: :sms, method: :notify_later, params: {}, args: {} }
+    ], MockNotifier.history
   end
 
-  test "notify_now invokes the line's notify method" do
+  test "#notify_now invokes the line's notify method" do
     MockNotifier.notify_now
 
     assert_equal 2, MockNotifier.history.size
-    assert_equal [[:email, :notify_now, {}], [:sms, :notify_now, {}]], MockNotifier.history
+    assert_equal [
+      { line: :email, method: :notify_now, params: {} },
+      { line: :sms, method: :notify_now, params: {} }
+    ], MockNotifier.history
   end
 
   test ".with params can be passed" do
@@ -57,8 +63,8 @@ class NotifyTest < ActiveSupport::TestCase
     MockNotifier.with(params).notify_later
 
     assert_equal 2, MockNotifier.history.size
-    assert_equal params, MockNotifier.history.first.last
-    assert_equal params, MockNotifier.history.last.last
+    assert_equal params, MockNotifier.history.first[:params]
+    assert_equal params, MockNotifier.history.last[:params]
   end
 
   test "params is accessible to the notifier instance" do
@@ -67,5 +73,13 @@ class NotifyTest < ActiveSupport::TestCase
     notifier.notify_later
 
     assert_equal params, notifier.params
+  end
+
+  test "#notify_later can accept arguments" do
+    args = { wait: 5, queue: :priority }
+    MockNotifier.notify_later(args)
+
+    assert_equal args, MockNotifier.history.first[:args]
+    assert_equal args, MockNotifier.history.last[:args]
   end
 end
