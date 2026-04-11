@@ -82,4 +82,19 @@ class NotifyTest < ActiveSupport::TestCase
     assert_equal args, MockNotifier.history.first[:args]
     assert_equal args, MockNotifier.history.last[:args]
   end
+
+  class NoopEmail < ActiveNotify::Line
+  end
+
+  class NoopNotifier < ActiveNotify::Base
+    notify_via :email, class_name: "NotifyTest::NoopEmail"
+  end
+
+  test "does not raise an error if line does not define the notify methods" do
+    assert_nothing_raised do
+      NoopNotifier.notify_now
+      NoopNotifier.notify_later
+      NoopNotifier.notify_later(priority: :urgent)
+    end
+  end
 end

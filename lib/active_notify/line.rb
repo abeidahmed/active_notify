@@ -8,6 +8,14 @@ module ActiveNotify
       @owner = owner
     end
 
+    def notify_now
+      # Override in subclasses to handle this notification.
+    end
+
+    def notify_later(_args = {})
+      # Override in subclasses to handle this notification.
+    end
+
     private
 
     attr_reader :owner
