@@ -17,17 +17,27 @@ module ActiveNotify
       def notify_later
         new.notify_later
       end
+
+      def with(params)
+        new(params)
+      end
+    end
+
+    attr_reader :params
+
+    def initialize(params = {})
+      @params = params
     end
 
     def notify_now
       lines.each do |_name, config|
-        config.constant.new.notify_now
+        config.constant.new(self).notify_now
       end
     end
 
     def notify_later
       lines.each do |_name, config|
-        config.constant.new.notify_later
+        config.constant.new(self).notify_later
       end
     end
   end
