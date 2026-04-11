@@ -12,7 +12,7 @@ module ActiveNotify
       # Override in subclasses to handle this notification.
     end
 
-    def notify_later(_args = {})
+    def notify_later(*)
       # Override in subclasses to handle this notification.
     end
 

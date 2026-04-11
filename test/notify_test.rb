@@ -2,7 +2,7 @@ require "test_helper"
 
 class NotifyTest < ActiveSupport::TestCase
   class Email < ActiveNotify::Delivery
-    def notify_later(args)
+    def notify_later(args = {})
       MockNotifier.history << { delivery: :email, method: :notify_later, params: params, args: args }
     end
 
@@ -12,7 +12,7 @@ class NotifyTest < ActiveSupport::TestCase
   end
 
   class SMS < ActiveNotify::Delivery
-    def notify_later(args)
+    def notify_later(args = {})
       MockNotifier.history << { delivery: :sms, method: :notify_later, params: params, args: args }
     end
 

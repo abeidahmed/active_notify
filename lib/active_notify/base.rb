@@ -31,13 +31,15 @@ module ActiveNotify
 
     def notify_now
       deliveries.each do |_name, config|
+        next unless config.notify?(self)
         config.constant.new(self).notify_now
       end
     end
 
-    def notify_later(args = {})
+    def notify_later(*args)
       deliveries.each do |_name, config|
-        config.constant.new(self).notify_later(args)
+        next unless config.notify?(self)
+        config.constant.new(self).notify_later(*args)
       end
     end
   end
