@@ -1,13 +1,17 @@
 require "active_support/core_ext/class/attribute"
 require_relative "delivery_config"
+require_relative "callbacks"
 
 module ActiveNotify
   class Base
+    include Callbacks
+
     class_attribute :deliveries, instance_writer: false, default: {}
 
     class << self
       def notify_via(delivery_name, options = {})
         self.deliveries = deliveries.merge(delivery_name => DeliveryConfig.new(delivery_name, options))
+        define_delivery_callbacks(delivery_name)
       end
 
       def notify_now
@@ -44,9 +48,14 @@ module ActiveNotify
     private
 
     def perform_deliveries
-      deliveries.each do |_name, config|
-        next unless config.notify?(self)
-        yield config.constant.new(self)
+      run_notify_callbacks do
+        deliveries.each do |name, config|
+          next unless config.notify?(self)
+
+          run_delivery_callbacks(name) do
+            yield config.constant.new(self)
+          end
+        end
       end
     end
   end
