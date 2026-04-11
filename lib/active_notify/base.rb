@@ -30,16 +30,23 @@ module ActiveNotify
     end
 
     def notify_now
-      deliveries.each do |_name, config|
-        next unless config.notify?(self)
-        config.constant.new(self).notify_now
+      perform_deliveries do |instance|
+        instance.notify_now
       end
     end
 
     def notify_later(*args)
+      perform_deliveries do |instance|
+        instance.notify_later(*args)
+      end
+    end
+
+    private
+
+    def perform_deliveries
       deliveries.each do |_name, config|
         next unless config.notify?(self)
-        config.constant.new(self).notify_later(*args)
+        yield config.constant.new(self)
       end
     end
   end
