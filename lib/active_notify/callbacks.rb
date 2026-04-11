@@ -23,6 +23,12 @@ module ActiveNotify
 
           set_callback on, kind, block, options if block
         end
+
+        define_method "skip_#{kind}_notify" do |*names, on: :notify, **options|
+          names.each do |name|
+            skip_callback on, kind, name, options
+          end
+        end
       end
     end
 
