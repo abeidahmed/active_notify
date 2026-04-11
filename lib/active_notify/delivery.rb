@@ -1,11 +1,11 @@
 require "active_support/core_ext/module/delegation"
 
 module ActiveNotify
-  class Line
-    delegate :params, to: :owner
+  class Delivery
+    delegate :params, to: :notifier
 
-    def initialize(owner)
-      @owner = owner
+    def initialize(notifier)
+      @notifier = notifier
     end
 
     def notify_now
@@ -18,6 +18,6 @@ module ActiveNotify
 
     private
 
-    attr_reader :owner
+    attr_reader :notifier
   end
 end

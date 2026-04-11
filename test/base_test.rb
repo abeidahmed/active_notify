@@ -10,11 +10,11 @@ class BaseTest < ActiveSupport::TestCase
     notify_via :action_cable
   end
 
-  test "defines lines" do
-    assert_equal [:email, :sms], BaseNotifier.lines.keys
+  test "defines deliveries" do
+    assert_equal [:email, :sms], BaseNotifier.deliveries.keys
   end
 
-  test "inherits lines from superclass" do
-    assert_equal [:email, :sms, :action_cable], ChildNotifier.lines.keys
+  test "inherits deliveries from superclass" do
+    assert_equal [:email, :sms, :action_cable], ChildNotifier.deliveries.keys
   end
 end

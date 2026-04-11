@@ -1,9 +1,9 @@
 module ActiveNotify
-  class LineConfig
+  class DeliveryConfig
     attr_reader :name, :options
 
-    def initialize(line_name, options = {})
-      @line_name = line_name
+    def initialize(delivery_name, options = {})
+      @delivery_name = delivery_name
       @options = options
     end
 

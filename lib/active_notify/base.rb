@@ -1,13 +1,13 @@
 require "active_support/core_ext/class/attribute"
-require_relative "line_config"
+require_relative "delivery_config"
 
 module ActiveNotify
   class Base
-    class_attribute :lines, instance_writer: false, default: {}
+    class_attribute :deliveries, instance_writer: false, default: {}
 
     class << self
-      def notify_via(line_name, options = {})
-        self.lines = lines.merge(line_name => LineConfig.new(line_name, options))
+      def notify_via(delivery_name, options = {})
+        self.deliveries = deliveries.merge(delivery_name => DeliveryConfig.new(delivery_name, options))
       end
 
       def notify_now
@@ -30,13 +30,13 @@ module ActiveNotify
     end
 
     def notify_now
-      lines.each do |_name, config|
+      deliveries.each do |_name, config|
         config.constant.new(self).notify_now
       end
     end
 
     def notify_later(args = {})
-      lines.each do |_name, config|
+      deliveries.each do |_name, config|
         config.constant.new(self).notify_later(args)
       end
     end
