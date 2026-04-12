@@ -41,7 +41,7 @@ module ActiveNotify
 
     def deliver_later(args = {})
       perform_deliveries do |instance, descriptor|
-        instance.deliver_later(descriptor.args.merge(args))
+        instance.deliver_later(descriptor.args(self).merge(args))
       end
     end
 

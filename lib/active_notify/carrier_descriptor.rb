@@ -2,12 +2,14 @@ module ActiveNotify
   class CarrierDescriptor
     RESERVED_KEYS = %i[class_name if unless].freeze
 
-    attr_reader :args
-
     def initialize(options = {})
       @options = options.extract!(*RESERVED_KEYS)
       @class_name = @options[:class_name]
       @args = options
+    end
+
+    def args(context)
+      @args.transform_values { |value| compute(value, context) }
     end
 
     def constant
@@ -34,6 +36,16 @@ module ActiveNotify
         context.send(condition)
       else
         condition
+      end
+    end
+
+    def compute(value, context)
+      return value unless value.respond_to?(:call, true)
+
+      if value.arity == 1
+        value.call(context)
+      else
+        context.instance_exec(&value)
       end
     end
   end
