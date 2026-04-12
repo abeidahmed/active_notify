@@ -13,41 +13,41 @@ class ConditionalNotificationTest < ActiveSupport::TestCase
 
   class Email < ActiveNotify::Carrier
     def deliver_now
-      History.entries << :email
+      History.entries << carrier_name
     end
 
     def deliver_later
-      History.entries << :email
+      History.entries << carrier_name
     end
   end
 
   class SMS < ActiveNotify::Carrier
     def deliver_now
-      History.entries << :sms
+      History.entries << carrier_name
     end
 
     def deliver_later
-      History.entries << :sms
+      History.entries << carrier_name
     end
   end
 
   class Websocket < ActiveNotify::Carrier
     def deliver_now
-      History.entries << :websocket
+      History.entries << carrier_name
     end
 
     def deliver_later
-      History.entries << :websocket
+      History.entries << carrier_name
     end
   end
 
   class Discord < ActiveNotify::Carrier
     def deliver_now
-      History.entries << :discord
+      History.entries << carrier_name
     end
 
     def deliver_later
-      History.entries << :discord
+      History.entries << carrier_name
     end
   end
 

@@ -53,7 +53,7 @@ module ActiveNotify
           next unless config.deliver?(self)
 
           run_carrier_callbacks(name) do
-            yield config.constant.new(self)
+            yield config.constant.new(self, carrier_name: name)
           end
         end
       end
