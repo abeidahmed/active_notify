@@ -1,25 +1,25 @@
 require "active_support/core_ext/class/attribute"
-require_relative "delivery_config"
+require_relative "carrier_descriptor"
 require_relative "callbacks"
 
 module ActiveNotify
   class Base
     include Callbacks
 
-    class_attribute :deliveries, instance_writer: false, default: {}
+    class_attribute :carriers, instance_writer: false, default: {}
 
     class << self
-      def notify_via(delivery_name, options = {})
-        self.deliveries = deliveries.merge(delivery_name => DeliveryConfig.new(delivery_name, options))
-        define_delivery_callbacks(delivery_name)
+      def deliver_via(carrier_name, options = {})
+        self.carriers = carriers.merge(carrier_name => CarrierDescriptor.new(carrier_name, options))
+        define_carrier_callbacks(carrier_name)
       end
 
-      def notify_now
-        new.notify_now
+      def deliver_now
+        new.deliver_now
       end
 
-      def notify_later(...)
-        new.notify_later(...)
+      def deliver_later(...)
+        new.deliver_later(...)
       end
 
       def with(params)
@@ -33,26 +33,26 @@ module ActiveNotify
       @params = params
     end
 
-    def notify_now
+    def deliver_now
       perform_deliveries do |instance|
-        instance.notify_now
+        instance.deliver_now
       end
     end
 
-    def notify_later(*args)
+    def deliver_later(*args)
       perform_deliveries do |instance|
-        instance.notify_later(*args)
+        instance.deliver_later(*args)
       end
     end
 
     private
 
     def perform_deliveries
-      run_notify_callbacks do
-        deliveries.each do |name, config|
-          next unless config.notify?(self)
+      run_delivery_callbacks do
+        carriers.each do |name, config|
+          next unless config.deliver?(self)
 
-          run_delivery_callbacks(name) do
+          run_carrier_callbacks(name) do
             yield config.constant.new(self)
           end
         end

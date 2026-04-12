@@ -1,18 +1,18 @@
 require "active_support/core_ext/module/delegation"
 
 module ActiveNotify
-  class Delivery
+  class Carrier
     delegate :params, to: :notifier
 
     def initialize(notifier)
       @notifier = notifier
     end
 
-    def notify_now
+    def deliver_now
       # Override in subclasses to handle this notification.
     end
 
-    def notify_later(*)
+    def deliver_later(*)
       # Override in subclasses to handle this notification.
     end
 

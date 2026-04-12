@@ -1,9 +1,9 @@
 module ActiveNotify
-  class DeliveryConfig
-    attr_reader :name, :options
+  class CarrierDescriptor
+    attr_reader :carrier_name, :options
 
-    def initialize(delivery_name, options = {})
-      @delivery_name = delivery_name
+    def initialize(carrier_name, options = {})
+      @carrier_name = carrier_name
       @options = options
     end
 
@@ -11,7 +11,7 @@ module ActiveNotify
       options.fetch(:class_name).constantize
     end
 
-    def notify?(context)
+    def deliver?(context)
       return false if options.key?(:if) && !evaluate(:if, context)
       return false if options.key?(:unless) && evaluate(:unless, context)
       true

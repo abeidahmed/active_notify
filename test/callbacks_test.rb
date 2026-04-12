@@ -11,36 +11,36 @@ class CallbacksTest < ActiveSupport::TestCase
     end
   end
 
-  class Email < ActiveNotify::Delivery
-    def notify_now
+  class Email < ActiveNotify::Carrier
+    def deliver_now
       History.entries << :email_delivered
     end
   end
 
-  class SMS < ActiveNotify::Delivery
-    def notify_now
+  class SMS < ActiveNotify::Carrier
+    def deliver_now
       History.entries << :sms_delivered
     end
   end
 
   class MockNotifier < ActiveNotify::Base
-    notify_via :email, class_name: "CallbacksTest::Email"
-    notify_via :sms, class_name: "CallbacksTest::SMS"
+    deliver_via :email, class_name: "CallbacksTest::Email"
+    deliver_via :sms, class_name: "CallbacksTest::SMS"
 
-    before_notify :log_before_notify
-    after_notify :log_after_notify
+    before_delivery :log_before_delivery
+    after_delivery :log_after_delivery
 
-    before_notify :log_before_email, on: :email
-    after_notify :log_after_sms, on: :sms
+    before_delivery :log_before_email, on: :email
+    after_delivery :log_after_sms, on: :sms
 
     private
 
-    def log_before_notify
-      History.entries << :before_notify
+    def log_before_delivery
+      History.entries << :before_delivery
     end
 
-    def log_after_notify
-      History.entries << :after_notify
+    def log_after_delivery
+      History.entries << :after_delivery
     end
 
     def log_before_email
@@ -56,36 +56,36 @@ class CallbacksTest < ActiveSupport::TestCase
     History.reset
   end
 
-  test "global before_notify and after_notify wrap all deliveries" do
-    MockNotifier.notify_now
+  test "global before_delivery and after_delivery wrap all deliveries" do
+    MockNotifier.deliver_now
 
-    assert_equal :before_notify, History.entries.first
-    assert_equal :after_notify, History.entries.last
+    assert_equal :before_delivery, History.entries.first
+    assert_equal :after_delivery, History.entries.last
   end
 
   test "per-delivery callbacks wrap individual deliveries" do
-    MockNotifier.notify_now
+    MockNotifier.deliver_now
 
     assert_equal [
-      :before_notify,
+      :before_delivery,
       :before_email,
       :email_delivered,
       :sms_delivered,
       :after_sms,
-      :after_notify
+      :after_delivery
     ], History.entries
   end
 
   class ConditionalNotifier < ActiveNotify::Base
-    notify_via :email, class_name: "CallbacksTest::Email", if: :deliver_email?
-    notify_via :sms, class_name: "CallbacksTest::SMS"
+    deliver_via :email, class_name: "CallbacksTest::Email", if: :deliver_email?
+    deliver_via :sms, class_name: "CallbacksTest::SMS"
 
-    before_notify :log_before_notify
-    after_notify :log_after_notify
+    before_delivery :log_before_delivery
+    after_delivery :log_after_delivery
 
-    before_notify :log_before_email, on: :email
-    after_notify :log_after_email, on: :email
-    before_notify :log_before_sms, on: :sms
+    before_delivery :log_before_email, on: :email
+    after_delivery :log_after_email, on: :email
+    before_delivery :log_before_sms, on: :sms
 
     private
 
@@ -93,12 +93,12 @@ class CallbacksTest < ActiveSupport::TestCase
       false
     end
 
-    def log_before_notify
-      History.entries << :before_notify
+    def log_before_delivery
+      History.entries << :before_delivery
     end
 
-    def log_after_notify
-      History.entries << :after_notify
+    def log_after_delivery
+      History.entries << :after_delivery
     end
 
     def log_before_email
@@ -115,46 +115,46 @@ class CallbacksTest < ActiveSupport::TestCase
   end
 
   test "skipped delivery does not run per-delivery callbacks" do
-    ConditionalNotifier.notify_now
+    ConditionalNotifier.deliver_now
 
     assert_equal [
-      :before_notify,
+      :before_delivery,
       :before_sms,
       :sms_delivered,
-      :after_notify
+      :after_delivery
     ], History.entries
   end
 
   class SkipGlobalNotifier < MockNotifier
-    skip_before_notify :log_before_notify
+    skip_before_delivery :log_before_delivery
   end
 
-  test "skip_before_notify removes a global before callback" do
-    SkipGlobalNotifier.notify_now
+  test "skip_before_delivery removes a global before callback" do
+    SkipGlobalNotifier.deliver_now
 
-    refute_includes History.entries, :before_notify
+    refute_includes History.entries, :before_delivery
     assert_includes History.entries, :email_delivered
     assert_includes History.entries, :sms_delivered
   end
 
   class SkipPerDeliveryNotifier < MockNotifier
-    skip_before_notify :log_before_email, on: :email
+    skip_before_delivery :log_before_email, on: :email
   end
 
-  test "skip_before_notify with on: removes a per-delivery callback" do
-    SkipPerDeliveryNotifier.notify_now
+  test "skip_before_delivery with on: removes a per-delivery callback" do
+    SkipPerDeliveryNotifier.deliver_now
 
     refute_includes History.entries, :before_email
     assert_includes History.entries, :email_delivered
-    assert_equal :before_notify, History.entries.first
+    assert_equal :before_delivery, History.entries.first
   end
 
   class SkipAfterNotifier < MockNotifier
-    skip_after_notify :log_after_sms, on: :sms
+    skip_after_delivery :log_after_sms, on: :sms
   end
 
-  test "skip_after_notify with on: removes a per-delivery callback" do
-    SkipAfterNotifier.notify_now
+  test "skip_after_delivery with on: removes a per-delivery callback" do
+    SkipAfterNotifier.deliver_now
 
     refute_includes History.entries, :after_sms
     assert_includes History.entries, :sms_delivered
