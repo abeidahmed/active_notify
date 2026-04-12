@@ -10,7 +10,7 @@ module ActiveNotify
 
     class << self
       def deliver_via(carrier_name, options = {})
-        self.carriers = carriers.merge(carrier_name => CarrierDescriptor.new(carrier_name, options))
+        self.carriers = carriers.merge(carrier_name => CarrierDescriptor.new(options))
         define_carrier_callbacks(carrier_name)
       end
 

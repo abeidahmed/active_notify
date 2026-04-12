@@ -1,9 +1,8 @@
 module ActiveNotify
   class CarrierDescriptor
-    attr_reader :carrier_name, :options
+    attr_reader :options
 
-    def initialize(carrier_name, options = {})
-      @carrier_name = carrier_name
+    def initialize(options = {})
       @options = options
     end
 
