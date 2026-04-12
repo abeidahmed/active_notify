@@ -39,9 +39,9 @@ module ActiveNotify
       end
     end
 
-    def deliver_later(*args)
-      perform_deliveries do |instance|
-        instance.deliver_later(*args)
+    def deliver_later(args = {})
+      perform_deliveries do |instance, descriptor|
+        instance.deliver_later(descriptor.args.merge(args))
       end
     end
 
@@ -49,11 +49,11 @@ module ActiveNotify
 
     def perform_deliveries
       run_delivery_callbacks do
-        carriers.each do |name, config|
-          next unless config.deliver?(self)
-
-          run_carrier_callbacks(name) do
-            yield config.constant.new(self, carrier_name: name)
+        carriers.each do |name, descriptor|
+          if descriptor.deliver?(self)
+            run_carrier_callbacks(name) do
+              yield descriptor.constant.new(self, carrier_name: name), descriptor
+            end
           end
         end
       end
