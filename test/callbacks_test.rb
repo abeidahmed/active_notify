@@ -1,25 +1,15 @@
 require "test_helper"
 
 class CallbacksTest < ActiveSupport::TestCase
-  class History
-    def self.entries
-      @entries ||= []
-    end
-
-    def self.reset
-      @entries = []
-    end
-  end
-
   class Email < ActiveNotify::Carrier
     def deliver_now
-      History.entries << :email_delivered
+      TestHistory.entries << :email_delivered
     end
   end
 
   class SMS < ActiveNotify::Carrier
     def deliver_now
-      History.entries << :sms_delivered
+      TestHistory.entries << :sms_delivered
     end
   end
 
@@ -36,31 +26,31 @@ class CallbacksTest < ActiveSupport::TestCase
     private
 
     def log_before_delivery
-      History.entries << :before_delivery
+      TestHistory.entries << :before_delivery
     end
 
     def log_after_delivery
-      History.entries << :after_delivery
+      TestHistory.entries << :after_delivery
     end
 
     def log_before_email
-      History.entries << :before_email
+      TestHistory.entries << :before_email
     end
 
     def log_after_sms
-      History.entries << :after_sms
+      TestHistory.entries << :after_sms
     end
   end
 
   setup do
-    History.reset
+    TestHistory.reset
   end
 
   test "global before_delivery and after_delivery wrap all deliveries" do
     MockNotifier.deliver_now
 
-    assert_equal :before_delivery, History.entries.first
-    assert_equal :after_delivery, History.entries.last
+    assert_equal :before_delivery, TestHistory.entries.first
+    assert_equal :after_delivery, TestHistory.entries.last
   end
 
   test "per-delivery callbacks wrap individual deliveries" do
@@ -73,7 +63,7 @@ class CallbacksTest < ActiveSupport::TestCase
       :sms_delivered,
       :after_sms,
       :after_delivery
-    ], History.entries
+    ], TestHistory.entries
   end
 
   class ConditionalNotifier < ActiveNotify::Base
@@ -94,23 +84,23 @@ class CallbacksTest < ActiveSupport::TestCase
     end
 
     def log_before_delivery
-      History.entries << :before_delivery
+      TestHistory.entries << :before_delivery
     end
 
     def log_after_delivery
-      History.entries << :after_delivery
+      TestHistory.entries << :after_delivery
     end
 
     def log_before_email
-      History.entries << :before_email
+      TestHistory.entries << :before_email
     end
 
     def log_after_email
-      History.entries << :after_email
+      TestHistory.entries << :after_email
     end
 
     def log_before_sms
-      History.entries << :before_sms
+      TestHistory.entries << :before_sms
     end
   end
 
@@ -122,7 +112,7 @@ class CallbacksTest < ActiveSupport::TestCase
       :before_sms,
       :sms_delivered,
       :after_delivery
-    ], History.entries
+    ], TestHistory.entries
   end
 
   class SkipGlobalNotifier < MockNotifier
@@ -132,9 +122,9 @@ class CallbacksTest < ActiveSupport::TestCase
   test "skip_before_delivery removes a global before callback" do
     SkipGlobalNotifier.deliver_now
 
-    refute_includes History.entries, :before_delivery
-    assert_includes History.entries, :email_delivered
-    assert_includes History.entries, :sms_delivered
+    refute_includes TestHistory.entries, :before_delivery
+    assert_includes TestHistory.entries, :email_delivered
+    assert_includes TestHistory.entries, :sms_delivered
   end
 
   class SkipPerDeliveryNotifier < MockNotifier
@@ -144,9 +134,9 @@ class CallbacksTest < ActiveSupport::TestCase
   test "skip_before_delivery with on: removes a per-delivery callback" do
     SkipPerDeliveryNotifier.deliver_now
 
-    refute_includes History.entries, :before_email
-    assert_includes History.entries, :email_delivered
-    assert_equal :before_delivery, History.entries.first
+    refute_includes TestHistory.entries, :before_email
+    assert_includes TestHistory.entries, :email_delivered
+    assert_equal :before_delivery, TestHistory.entries.first
   end
 
   class SkipAfterNotifier < MockNotifier
@@ -156,7 +146,7 @@ class CallbacksTest < ActiveSupport::TestCase
   test "skip_after_delivery with on: removes a per-delivery callback" do
     SkipAfterNotifier.deliver_now
 
-    refute_includes History.entries, :after_sms
-    assert_includes History.entries, :sms_delivered
+    refute_includes TestHistory.entries, :after_sms
+    assert_includes TestHistory.entries, :sms_delivered
   end
 end

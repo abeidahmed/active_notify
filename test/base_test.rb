@@ -1,35 +1,18 @@
 require "test_helper"
 
 class BaseTest < ActiveSupport::TestCase
-  class Generic < ActiveNotify::Carrier
-  end
-
-  class Email < ActiveNotify::Carrier
-    def deliver_now
-      ChildNotifier.history << carrier_name
-    end
-  end
-
   class BaseNotifier < ActiveNotify::Base
-    deliver_via :email, class_name: "BaseTest::Generic"
-    deliver_via :sms, class_name: "BaseTest::Generic"
+    deliver_via :email, class_name: "ActiveNotify::Carrier"
+    deliver_via :sms, class_name: "ActiveNotify::Carrier"
   end
 
   class ChildNotifier < BaseNotifier
-    deliver_via :action_cable, class_name: "BaseTest::Generic"
-    deliver_via :email, class_name: "BaseTest::Email"
-
-    def self.history
-      @history ||= []
-    end
-
-    def self.reset_history
-      @history = []
-    end
+    deliver_via :action_cable, class_name: "ActiveNotify::Carrier"
+    deliver_via :email, class_name: "TestCarrier"
   end
 
   setup do
-    ChildNotifier.reset_history
+    TestHistory.reset
   end
 
   test "defines carriers" do
@@ -43,7 +26,7 @@ class BaseTest < ActiveSupport::TestCase
   test "carrier definition overrides parent carrier" do
     ChildNotifier.deliver_now
 
-    assert_equal 1, ChildNotifier.history.size
-    assert_equal [:email], ChildNotifier.history
+    assert_equal 1, TestHistory.entries.size
+    assert_equal :email, TestHistory.entries.first[:carrier]
   end
 end

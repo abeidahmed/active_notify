@@ -1,70 +1,42 @@
 require "test_helper"
 
-class NotifyTest < ActiveSupport::TestCase
-  class Email < ActiveNotify::Carrier
-    def deliver_later(args = {})
-      MockNotifier.history << { delivery: carrier_name, method: :deliver_later, params: params, args: args }
-    end
-
-    def deliver_now
-      MockNotifier.history << { delivery: carrier_name, method: :deliver_now, params: params }
-    end
-  end
-
-  class SMS < ActiveNotify::Carrier
-    def deliver_later(args = {})
-      MockNotifier.history << { delivery: carrier_name, method: :deliver_later, params: params, args: args }
-    end
-
-    def deliver_now
-      MockNotifier.history << { delivery: carrier_name, method: :deliver_now, params: params }
-    end
-  end
-
+class DeliveryTest < ActiveSupport::TestCase
   class MockNotifier < ActiveNotify::Base
-    deliver_via :email, class_name: "NotifyTest::Email"
-    deliver_via :sms, class_name: "NotifyTest::SMS"
-
-    def self.history
-      @history ||= []
-    end
-
-    def self.reset_history
-      @history = []
-    end
+    deliver_via :email, class_name: "TestCarrier"
+    deliver_via :sms, class_name: "TestCarrier"
   end
 
   setup do
-    MockNotifier.reset_history
+    TestHistory.reset
   end
 
-  test "#deliver_later invokes the delivery's deliver_later method" do
+  test "#deliver_later invokes the carrier's deliver_later method" do
     MockNotifier.deliver_later
 
-    assert_equal 2, MockNotifier.history.size
+    assert_equal 2, TestHistory.entries.size
     assert_equal [
-      { delivery: :email, method: :deliver_later, params: {}, args: {} },
-      { delivery: :sms, method: :deliver_later, params: {}, args: {} }
-    ], MockNotifier.history
+      { carrier: :email, method: :deliver_later, params: {}, args: {} },
+      { carrier: :sms, method: :deliver_later, params: {}, args: {} }
+    ], TestHistory.entries
   end
 
-  test "#deliver_now invokes the delivery's notify method" do
+  test "#deliver_now invokes the carrier's deliver_now method" do
     MockNotifier.deliver_now
 
-    assert_equal 2, MockNotifier.history.size
+    assert_equal 2, TestHistory.entries.size
     assert_equal [
-      { delivery: :email, method: :deliver_now, params: {} },
-      { delivery: :sms, method: :deliver_now, params: {} }
-    ], MockNotifier.history
+      { carrier: :email, method: :deliver_now, params: {} },
+      { carrier: :sms, method: :deliver_now, params: {} }
+    ], TestHistory.entries
   end
 
   test ".with params can be passed" do
     params = { sender_id: 1, recipient_id: 1 }
     MockNotifier.with(params).deliver_later
 
-    assert_equal 2, MockNotifier.history.size
-    assert_equal params, MockNotifier.history.first[:params]
-    assert_equal params, MockNotifier.history.last[:params]
+    assert_equal 2, TestHistory.entries.size
+    assert_equal params, TestHistory.entries.first[:params]
+    assert_equal params, TestHistory.entries.last[:params]
   end
 
   test "params is accessible to the notifier instance" do
@@ -79,18 +51,15 @@ class NotifyTest < ActiveSupport::TestCase
     args = { wait: 5, queue: :priority }
     MockNotifier.deliver_later(args)
 
-    assert_equal args, MockNotifier.history.first[:args]
-    assert_equal args, MockNotifier.history.last[:args]
-  end
-
-  class NoopEmail < ActiveNotify::Carrier
+    assert_equal args, TestHistory.entries.first[:args]
+    assert_equal args, TestHistory.entries.last[:args]
   end
 
   class NoopNotifier < ActiveNotify::Base
-    deliver_via :email, class_name: "NotifyTest::NoopEmail"
+    deliver_via :email, class_name: "ActiveNotify::Carrier"
   end
 
-  test "does not raise an error if delivery does not define the notify methods" do
+  test "does not raise an error if carrier does not define the deliver methods" do
     assert_nothing_raised do
       NoopNotifier.deliver_now
       NoopNotifier.deliver_later

@@ -1,61 +1,11 @@
 require "test_helper"
 
 class ConditionalNotificationTest < ActiveSupport::TestCase
-  class History
-    def self.entries
-      @entries ||= []
-    end
-
-    def self.reset
-      @entries = []
-    end
-  end
-
-  class Email < ActiveNotify::Carrier
-    def deliver_now
-      History.entries << carrier_name
-    end
-
-    def deliver_later
-      History.entries << carrier_name
-    end
-  end
-
-  class SMS < ActiveNotify::Carrier
-    def deliver_now
-      History.entries << carrier_name
-    end
-
-    def deliver_later
-      History.entries << carrier_name
-    end
-  end
-
-  class Websocket < ActiveNotify::Carrier
-    def deliver_now
-      History.entries << carrier_name
-    end
-
-    def deliver_later
-      History.entries << carrier_name
-    end
-  end
-
-  class Discord < ActiveNotify::Carrier
-    def deliver_now
-      History.entries << carrier_name
-    end
-
-    def deliver_later
-      History.entries << carrier_name
-    end
-  end
-
   class MockNotifier < ActiveNotify::Base
-    deliver_via :email, class_name: "ConditionalNotificationTest::Email", if: :deliver?
-    deliver_via :sms, class_name: "ConditionalNotificationTest::SMS", unless: :deliver?
-    deliver_via :websocket, class_name: "ConditionalNotificationTest::Websocket", if: -> { deliver? }
-    deliver_via :discord, class_name: "ConditionalNotificationTest::Discord", unless: -> { deliver? }
+    deliver_via :email, class_name: "TestCarrier", if: :deliver?
+    deliver_via :sms, class_name: "TestCarrier", unless: :deliver?
+    deliver_via :websocket, class_name: "TestCarrier", if: -> { deliver? }
+    deliver_via :discord, class_name: "TestCarrier", unless: -> { deliver? }
 
     private
 
@@ -65,10 +15,10 @@ class ConditionalNotificationTest < ActiveSupport::TestCase
   end
 
   class MockNotifierWhenFalse < ActiveNotify::Base
-    deliver_via :email, class_name: "ConditionalNotificationTest::Email", if: :deliver?
-    deliver_via :sms, class_name: "ConditionalNotificationTest::SMS", unless: :deliver?
-    deliver_via :websocket, class_name: "ConditionalNotificationTest::Websocket", if: -> { deliver? }
-    deliver_via :discord, class_name: "ConditionalNotificationTest::Discord", unless: -> { deliver? }
+    deliver_via :email, class_name: "TestCarrier", if: :deliver?
+    deliver_via :sms, class_name: "TestCarrier", unless: :deliver?
+    deliver_via :websocket, class_name: "TestCarrier", if: -> { deliver? }
+    deliver_via :discord, class_name: "TestCarrier", unless: -> { deliver? }
 
     private
 
@@ -78,43 +28,43 @@ class ConditionalNotificationTest < ActiveSupport::TestCase
   end
 
   setup do
-    History.reset
+    TestHistory.reset
   end
 
   test "#deliver_now runs if: deliveries and skips unless: deliveries when condition is true" do
     MockNotifier.deliver_now
 
-    assert_equal [:email, :websocket], History.entries
+    assert_equal [:email, :websocket], TestHistory.carriers
   end
 
   test "#deliver_later runs if: deliveries and skips unless: deliveries when condition is true" do
     MockNotifier.deliver_later
 
-    assert_equal [:email, :websocket], History.entries
+    assert_equal [:email, :websocket], TestHistory.carriers
   end
 
   test "#deliver_now skips if: deliveries and runs unless: deliveries when condition is false" do
     MockNotifierWhenFalse.deliver_now
 
-    assert_equal [:sms, :discord], History.entries
+    assert_equal [:sms, :discord], TestHistory.carriers
   end
 
   test "#deliver_later skips if: deliveries and runs unless: deliveries when condition is false" do
     MockNotifierWhenFalse.deliver_later
 
-    assert_equal [:sms, :discord], History.entries
+    assert_equal [:sms, :discord], TestHistory.carriers
   end
 
   class MockNotifierWithLambdaBoolean < ActiveNotify::Base
-    deliver_via :email, class_name: "ConditionalNotificationTest::Email", if: -> { true }
-    deliver_via :sms, class_name: "ConditionalNotificationTest::SMS", if: -> { false }
-    deliver_via :websocket, class_name: "ConditionalNotificationTest::Websocket", unless: -> { true }
-    deliver_via :discord, class_name: "ConditionalNotificationTest::Discord", unless: -> { false }
+    deliver_via :email, class_name: "TestCarrier", if: -> { true }
+    deliver_via :sms, class_name: "TestCarrier", if: -> { false }
+    deliver_via :websocket, class_name: "TestCarrier", unless: -> { true }
+    deliver_via :discord, class_name: "TestCarrier", unless: -> { false }
   end
 
   test "if: and unless: work with literal boolean lambdas" do
     MockNotifierWithLambdaBoolean.deliver_now
 
-    assert_equal [:email, :discord], History.entries
+    assert_equal [:email, :discord], TestHistory.carriers
   end
 end
