@@ -11,11 +11,11 @@ module ActiveNotify
     end
 
     def deliver_now
-      # Override in subclasses to handle this notification.
+      # Override in subclasses to handle this delivery.
     end
 
     def deliver_later(*)
-      # Override in subclasses to handle this notification.
+      # Override in subclasses to handle this delivery.
     end
 
     private
