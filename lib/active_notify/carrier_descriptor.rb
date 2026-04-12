@@ -2,9 +2,12 @@ module ActiveNotify
   class CarrierDescriptor
     RESERVED_KEYS = %i[class_name if unless].freeze
 
-    def initialize(options = {})
+    attr_reader :name
+
+    def initialize(name, notifier_class, options = {})
+      @name = name
+      @notifier_class = notifier_class
       @options = options.extract!(*RESERVED_KEYS)
-      @class_name = @options[:class_name]
       @args = options
     end
 
@@ -13,8 +16,8 @@ module ActiveNotify
     end
 
     def constant
-      raise ArgumentError unless @class_name
-      @class_name.constantize
+      return @options[:class_name].constantize if @options[:class_name]
+      @notifier_class.const_get(name.to_s.classify)
     end
 
     def deliver?(context)
