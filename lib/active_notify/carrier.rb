@@ -2,6 +2,7 @@ require "active_support/core_ext/module/delegation"
 
 module ActiveNotify
   class Carrier
+    attr_reader :notifier
     delegate :params, to: :notifier
 
     def initialize(notifier)
@@ -15,9 +16,5 @@ module ActiveNotify
     def deliver_later(*)
       # Override in subclasses to handle this notification.
     end
-
-    private
-
-    attr_reader :notifier
   end
 end

@@ -6,6 +6,7 @@ class BaseTest < ActiveSupport::TestCase
 
   class Email < ActiveNotify::Carrier
     def deliver_now
+      raise ArgumentError unless notifier.is_a?(ActiveNotify::Base)
       ChildNotifier.history << :email
     end
   end
