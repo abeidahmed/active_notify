@@ -31,7 +31,7 @@ module ActiveNotify
       condition = options[kind]
 
       if condition.respond_to?(:call, true)
-        context.instance_exec(&condition)
+        compute(condition, context)
       elsif condition.is_a?(Symbol)
         context.send(condition)
       else

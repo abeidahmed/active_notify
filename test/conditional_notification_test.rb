@@ -14,19 +14,6 @@ class ConditionalNotificationTest < ActiveSupport::TestCase
     end
   end
 
-  class MockNotifierWhenFalse < ActiveNotify::Base
-    deliver_via :email, class_name: "TestCarrier", if: :deliver?
-    deliver_via :sms, class_name: "TestCarrier", unless: :deliver?
-    deliver_via :websocket, class_name: "TestCarrier", if: -> { deliver? }
-    deliver_via :discord, class_name: "TestCarrier", unless: -> { deliver? }
-
-    private
-
-    def deliver?
-      false
-    end
-  end
-
   setup do
     TestHistory.reset
   end
@@ -43,16 +30,28 @@ class ConditionalNotificationTest < ActiveSupport::TestCase
     assert_equal [:email, :websocket], TestHistory.carriers
   end
 
+  class MockNotifierWhenFalse < ActiveNotify::Base
+    deliver_via :email, class_name: "TestCarrier", if: :deliver?
+    deliver_via :sms, class_name: "TestCarrier", unless: :deliver?
+    deliver_via :websocket, class_name: "TestCarrier", if: -> { deliver? }
+    deliver_via :discord, class_name: "TestCarrier", unless: -> { deliver? }
+    deliver_via :ios, class_name: "TestCarrier", unless: ->(notifier) { notifier.deliver? }
+
+    def deliver?
+      false
+    end
+  end
+
   test "#deliver_now skips if: deliveries and runs unless: deliveries when condition is false" do
     MockNotifierWhenFalse.deliver_now
 
-    assert_equal [:sms, :discord], TestHistory.carriers
+    assert_equal [:sms, :discord, :ios], TestHistory.carriers
   end
 
   test "#deliver_later skips if: deliveries and runs unless: deliveries when condition is false" do
     MockNotifierWhenFalse.deliver_later
 
-    assert_equal [:sms, :discord], TestHistory.carriers
+    assert_equal [:sms, :discord, :ios], TestHistory.carriers
   end
 
   class MockNotifierWithLambdaBoolean < ActiveNotify::Base
