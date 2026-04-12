@@ -11,13 +11,13 @@ module ActiveNotify
       @args = options
     end
 
-    def args(context)
-      @args.transform_values { |value| compute(value, context) }
-    end
-
     def constant
       return @options[:class_name].constantize if @options[:class_name]
       @notifier_class.const_get(name.to_s.classify)
+    end
+
+    def args(context)
+      @args.transform_values { |value| compute(value, context) }
     end
 
     def deliver?(context)
