@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveNotify
   class CarrierDescriptor
     RESERVED_KEYS = %i[class_name if unless].freeze
