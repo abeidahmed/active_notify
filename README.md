@@ -57,6 +57,12 @@ CommentNotifier.with(user: user, comment: comment).deliver_later
 
 The hash passed to `with` is available to every carrier (and every callback) as `params`.
 
+## Guides
+
+- [carriers.md](docs/1_carriers.md) - write a carrier class for a delivery channel
+- [delivery.md](docs/2_delivery.md) - sync vs async delivery, default args, conditional delivery
+- [callbacks.md](docs/3_callbacks.md) - run code before, after, or around a delivery
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can
