@@ -27,7 +27,13 @@ class CommentNotifier < ActiveNotify::Base
   deliver_via :email, wait: 2.minutes
   deliver_via :sms
 
+  after_delivery :record_notification
+
   private
+
+  def record_notification
+    Notification.create!(recipient: params[:user], comment: params[:comment])
+  end
 
   class Email < ActiveNotify::Carrier
     def deliver_later(options = {})
