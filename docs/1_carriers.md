@@ -13,6 +13,8 @@ class CommentNotifier < ActiveNotify::Base
   deliver_via :email
   deliver_via :sms
 
+  private
+
   class Email < ActiveNotify::Carrier
     def deliver_now
       CommentMailer.with(params).new_comment.deliver_now

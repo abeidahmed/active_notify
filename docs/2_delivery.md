@@ -84,6 +84,8 @@ class CommentNotifier < ActiveNotify::Base
   deliver_via :email, if: :email_subscribed?
   deliver_via :sms,   unless: -> { params[:silent] }
 
+  private
+
   def email_subscribed?
     params[:user].email_subscribed?
   end

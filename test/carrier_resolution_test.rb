@@ -5,6 +5,8 @@ class CarrierResolutionTest < ActiveSupport::TestCase
     deliver_via :email
     deliver_via :sms, class_name: "TestCarrier"
 
+    private
+
     class Email < TestCarrier; end
   end
 
