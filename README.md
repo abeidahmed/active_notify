@@ -24,16 +24,12 @@ Declare a notifier, the carriers it delivers through, and the carrier classes th
 
 ```ruby
 class CommentNotifier < ActiveNotify::Base
-  deliver_via :email, wait: 2.minutes
+  deliver_via :email, wait: -> { 2.minutes }
   deliver_via :sms
 
   after_delivery :record_notification
 
   private
-
-  def record_notification
-    Notification.create!(recipient: params[:user], comment: params[:comment])
-  end
 
   class Email < ActiveNotify::Carrier
     def deliver_later(options = {})
@@ -45,6 +41,10 @@ class CommentNotifier < ActiveNotify::Base
     def deliver_later
       TwilioClient.send_sms(to: params[:user].phone, body: params[:comment].body)
     end
+  end
+
+  def record_notification
+    Notification.create!(recipient: params[:user], comment: params[:comment])
   end
 end
 ```
