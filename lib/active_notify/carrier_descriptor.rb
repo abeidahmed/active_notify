@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ActiveNotify
-  class CarrierDescriptor
+  class CarrierDescriptor # :nodoc:
     RESERVED_KEYS = %i[class_name if unless].freeze
 
     attr_reader :name

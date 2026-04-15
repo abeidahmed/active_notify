@@ -116,7 +116,7 @@ module ActiveNotify
       end
     end
 
-    # The params passed to {.with}[rdoc-ref:Base.with] (or +new+). Available
+    # The params passed to {.with}[rdoc-ref:Base.with]. Available
     # to callbacks and carriers via the +params+ accessor.
     attr_reader :params
 
