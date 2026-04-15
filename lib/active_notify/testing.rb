@@ -17,7 +17,7 @@ module ActiveNotify
           TestDelivery.track(
             notifier_class: self.class,
             carrier_name: instance.carrier_name,
-            method: :deliver_now,
+            method_name: :deliver_now,
             params:,
             args: nil
           )
