@@ -22,6 +22,11 @@ module ActiveNotify
   #   class CommentNotifier < ActiveNotify::Base
   #     deliver_via :email
   #     deliver_via :sms
+  #
+  #     private
+  #
+  #     class Email < ActiveNotify::Carrier; end
+  #     class Sms < ActiveNotify::Carrier; end
   #   end
   #
   #   CommentNotifier.with(user: user).deliver_later
@@ -56,7 +61,7 @@ module ActiveNotify
   # Procs and symbols are evaluated against the notifier instance:
   #
   #   class CommentNotifier < ActiveNotify::Base
-  #     deliver_via :email, queue: :urgent, wait: ->(notifier) { notifier.params[:delay] }
+  #     deliver_via :email, queue: :urgent, wait: -> { params[:delay] }
   #   end
   #
   # Subclasses inherit the carriers of their parent, and can add or

@@ -24,7 +24,7 @@ Declare a notifier, the carriers it delivers through, and the carrier classes th
 
 ```ruby
 class CommentNotifier < ActiveNotify::Base
-  deliver_via :email, wait: -> { 2.minutes }
+  deliver_via :email, wait: 2.minutes
   deliver_via :sms
 
   after_delivery :record_notification

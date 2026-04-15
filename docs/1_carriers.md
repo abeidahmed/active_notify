@@ -29,6 +29,7 @@ class CommentNotifier < ActiveNotify::Base
     def deliver_now
       TwilioClient.send_sms(to: params[:user].phone, body: params[:comment].body)
     end
+    alias_method :deliver_later, :deliver_now
   end
 end
 ```
