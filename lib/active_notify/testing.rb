@@ -25,6 +25,15 @@ module ActiveNotify
       end
 
       def deliver_later(args = {})
+        perform_deliveries do |instance|
+          TestDelivery.track(
+            notifier_class: self.class,
+            carrier_name: instance.carrier_name,
+            method_name: :deliver_later,
+            params:,
+            args:
+          )
+        end
       end
     end
   end
