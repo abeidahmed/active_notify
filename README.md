@@ -62,6 +62,7 @@ The hash passed to `with` is available to every carrier (and every callback) as 
 - [carriers.md](docs/1_carriers.md) - write a carrier class for a delivery channel
 - [delivery.md](docs/2_delivery.md) - sync vs async delivery, default args, conditional delivery
 - [callbacks.md](docs/3_callbacks.md) - run code before, after, or around a delivery
+- [testing.md](docs/4_testing.md) - assert on deliveries with the minitest helper
 
 ## Development
 
