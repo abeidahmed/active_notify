@@ -9,10 +9,16 @@ module ActiveNotify
       def track(delivery)
         deliveries << delivery
       end
+
+      def enabled?
+        enabled
+      end
     end
 
     module Behavior
       def deliver_now
+        return super unless TestDelivery.enabled?
+
         perform_deliveries do |instance|
           TestDelivery.track(
             notifier_class: self.class,
@@ -25,6 +31,8 @@ module ActiveNotify
       end
 
       def deliver_later(args = {})
+        return super unless TestDelivery.enabled?
+
         perform_deliveries do |instance|
           TestDelivery.track(
             notifier_class: self.class,

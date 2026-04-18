@@ -10,12 +10,7 @@ module ActiveNotify
     end
 
     def assert_notify_deliveries(number, &block)
-      if block
-        diff = capture_notify_deliveries(&block).size
-        assert_equal number, diff, "#{number} notify deliveries expected, but #{diff} were delivered"
-      else
-        assert_equal number, TestDelivery.deliveries.size
-      end
+      _assert_notify_deliveries(number, verb: "delivered", &block)
     end
 
     def assert_no_notify_deliveries(&)
@@ -23,29 +18,24 @@ module ActiveNotify
     end
 
     def assert_enqueued_notify_deliveries(number, &block)
-      handler = ->(delivery) { delivery[:method_name] == :deliver_later }
-
-      if block
-        diff = capture_notify_deliveries(&block).filter(&handler).size
-        assert_equal number, diff, "#{number} notify deliveries expected, but #{diff} were enqueued"
-      else
-        assert_equal number, TestDelivery.deliveries.filter(&handler).size
-      end
+      _assert_notify_deliveries(number, verb: "enqueued", filter: ENQUEUED_FILTER, &block)
     end
 
     def assert_no_enqueued_notify_deliveries(&)
       assert_enqueued_notify_deliveries(0, &)
     end
 
-    def capture_notify_deliveries(&block)
+    def capture_notify_deliveries
+      raise ArgumentError, "block is required" unless block_given?
+
       original_count = TestDelivery.deliveries.size
-      block.call
-      new_count = TestDelivery.deliveries.size
-      diff = new_count - original_count
-      TestDelivery.deliveries.last(diff)
+      yield
+      TestDelivery.deliveries[original_count..] || []
     end
 
     private
+
+    ENQUEUED_FILTER = ->(delivery) { delivery[:method_name] == :deliver_later }
 
     def setup_test_deliveries
       @old_enabled = TestDelivery.enabled
@@ -56,6 +46,12 @@ module ActiveNotify
     def teardown_test_deliveries
       TestDelivery.enabled = @old_enabled
       TestDelivery.deliveries.clear
+    end
+
+    def _assert_notify_deliveries(number, verb:, filter: nil, &block)
+      source = block ? capture_notify_deliveries(&block) : TestDelivery.deliveries
+      actual = filter ? source.count(&filter) : source.size
+      assert_equal number, actual, "#{number} notify deliveries expected, but #{actual} were #{verb}"
     end
   end
 end
